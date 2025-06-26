@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Detection System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            padding: 2rem 0;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.95);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .result-card {
+            border-left: 5px solid #28a745;
+            background: #f8f9fa;
+        }
+        
+        .result-card.phishing {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .spinner-border {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            color: #6c757d;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .feature-badge {
+            background: #e9ecef;
+            color: #495057;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 2px;
+            display: inline-block;
+        }
+        
+        .confidence-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+        
+        .confidence-fill.high {
+            background: linear-gradient(90deg, #dc3545, #fd7e14);
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h1 class="mb-0">
+                            <i class="fas fa-shield-alt me-3"></i>
+                            Phishing Detection System
+                        </h1>
+                        <p class="mb-0 mt-2">Multi-domain phishing detection for URLs, SMS, and Emails</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <!-- Navigation Tabs -->
+                        <ul class="nav nav-tabs mb-4" id="detectionTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="url-tab" data-bs-toggle="tab" data-bs-target="#url" type="button" role="tab">
+                                    <i class="fas fa-link me-2"></i>URL Detection
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sms-tab" data-bs-toggle="tab" data-bs-target="#sms" type="button" role="tab">
+                                    <i class="fas fa-sms me-2"></i>SMS Detection
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email" type="button" role="tab">
+                                    <i class="fas fa-envelope me-2"></i>Email Detection
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="detectionTabContent">
+                            <!-- URL Detection Tab -->
+                            <div class="tab-pane fade show active" id="url" role="tabpanel">
+                                <form id="urlForm">
+                                    <div class="mb-3">
+                                        <label for="urlInput" class="form-label">Enter URL to analyze:</label>
+                                        <input type="url" class="form-control" id="urlInput" placeholder="https://example.com" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="loading">
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            Analyzing...
+                                        </span>
+                                        <span class="normal">
+                                            <i class="fas fa-search me-2"></i>Analyze URL
+                                        </span>
+                                    </button>
+                                </form>
+                                <div id="urlResult" class="mt-4" style="display: none;"></div>
+                            </div>
+                            
+                            <!-- SMS Detection Tab -->
+                            <div class="tab-pane fade" id="sms" role="tabpanel">
+                                <form id="smsForm">
+                                    <div class="mb-3">
+                                        <label for="smsInput" class="form-label">Enter SMS message to analyze:</label>
+                                        <textarea class="form-control" id="smsInput" rows="4" placeholder="Enter the SMS message here..." required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="loading">
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            Analyzing...
+                                        </span>
+                                        <span class="normal">
+                                            <i class="fas fa-search me-2"></i>Analyze SMS
+                                        </span>
+                                    </button>
+                                </form>
+                                <div id="smsResult" class="mt-4" style="display: none;"></div>
+                            </div>
+                            
+                            <!-- Email Detection Tab -->
+                            <div class="tab-pane fade" id="email" role="tabpanel">
+                                <form id="emailForm">
+                                    <div class="mb-3">
+                                        <label for="emailInput" class="form-label">Enter email content to analyze:</label>
+                                        <textarea class="form-control" id="emailInput" rows="6" placeholder="Enter the email content here..." required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="loading">
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            Analyzing...
+                                        </span>
+                                        <span class="normal">
+                                            <i class="fas fa-search me-2"></i>Analyze Email
+                                        </span>
+                                    </button>
+                                </form>
+                                <div id="emailResult" class="mt-4" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // URL Detection
+        document.getElementById('urlForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const url = document.getElementById('urlInput').value;
+            await analyzeContent('url', {url: url}, 'urlResult');
+        });
+
+        // SMS Detection
+        document.getElementById('smsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const smsText = document.getElementById('smsInput').value;
+            await analyzeContent('sms', {sms_text: smsText}, 'smsResult');
+        });
+
+        // Email Detection
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const emailText = document.getElementById('emailInput').value;
+            await analyzeContent('email', {email_text: emailText}, 'emailResult');
+        });
+
+        async function analyzeContent(type, data, resultId) {
+            const form = document.querySelector(`#${type}Form`);
+            const button = form.querySelector('button[type="submit"]');
+            const loading = button.querySelector('.loading');
+            const normal = button.querySelector('.normal');
+            const resultDiv = document.getElementById(resultId);
+
+            // Show loading
+            loading.style.display = 'inline';
+            normal.style.display = 'none';
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`/detect_${type}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayResult(result, resultDiv, type);
+                } else {
+                    displayError(result.error, resultDiv);
+                }
+            } catch (error) {
+                displayError('An error occurred while analyzing the content.', resultDiv);
+            } finally {
+                // Hide loading
+                loading.style.display = 'none';
+                normal.style.display = 'inline';
+                button.disabled = false;
+            }
+        }
+
+        function displayResult(result, resultDiv, type) {
+            const isPhishing = result.prediction.toLowerCase().includes('phishing') || result.prediction.toLowerCase().includes('spam');
+            const confidence = parseFloat(result.confidence);
+            
+            resultDiv.innerHTML = `
+                <div class="card result-card ${isPhishing ? 'phishing' : ''}">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title">
+                                    <i class="fas ${isPhishing ? 'fa-exclamation-triangle text-danger' : 'fa-check-circle text-success'} me-2"></i>
+                                    ${result.prediction}
+                                </h5>
+                                <p class="card-text">
+                                    <strong>Confidence:</strong> ${result.confidence}<br>
+                                    <strong>Risk Level:</strong> 
+                                    <span class="badge ${isPhishing ? 'bg-danger' : 'bg-success'}">${result.risk_level}</span><br>
+                                    <strong>Features Analyzed:</strong> ${result.features_analyzed}
+                                </p>
+                                
+                                <div class="confidence-bar mb-3">
+                                    <div class="confidence-fill ${confidence > 70 ? 'high' : ''}" style="width: ${confidence}%"></div>
+                                </div>
+                                
+                                ${result.suspicious_features && result.suspicious_features.length > 0 ? `
+                                    <div class="mt-3">
+                                        <strong>Suspicious Features Detected:</strong><br>
+                                        ${result.suspicious_features.map(feature => 
+                                            `<span class="feature-badge">${feature}</span>`
+                                        ).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="display-4 ${isPhishing ? 'text-danger' : 'text-success'}">
+                                    <i class="fas ${isPhishing ? 'fa-shield-alt' : 'fa-shield-check'}"></i>
+                                </div>
+                                <p class="text-muted">${isPhishing ? 'Potential Threat Detected' : 'Safe Content'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultDiv.style.display = 'block';
+        }
+
+        function displayError(error, resultDiv) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    ${error}
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html> 
