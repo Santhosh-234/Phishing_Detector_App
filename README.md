@@ -53,12 +53,31 @@ The application uses three publicly available datasets:
 3. **Configure the service**:
    - **Name**: `phishing-detector-app`
    - **Environment**: `Python`
-   - **Build Command**: `pip install -r requirements.txt`
+   - **Build Command**: `pip install --upgrade pip setuptools wheel && pip install -r requirements.txt`
    - **Start Command**: `gunicorn app:app`
+   - **Python Version**: `3.11.0`
 
 4. **Deploy**: Click "Create Web Service"
 
 Your app will be available at `https://your-app-name.onrender.com`
+
+#### Troubleshooting Render Deployment
+
+If you encounter build errors on Render:
+
+1. **Use the simplified requirements**:
+   - Change build command to: `pip install -r requirements-simple.txt`
+
+2. **Alternative build command**:
+   - Use: `chmod +x build.sh && ./build.sh`
+
+3. **Check Python version**:
+   - Ensure `runtime.txt` specifies `python-3.11.0`
+
+4. **Common issues**:
+   - **Setuptools error**: The updated `requirements.txt` includes setuptools and wheel
+   - **Memory issues**: The app will train models on first run, which may take time
+   - **Timeout**: First deployment may take 10-15 minutes due to model training
 
 ### Option 2: Railway (Alternative - Free)
 
@@ -172,11 +191,14 @@ curl -X POST http://localhost:5000/detect_email \
 Phishing_Detector_App/
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
+├── requirements-simple.txt # Simplified dependencies for deployment
 ├── README.md             # Project documentation
 ├── render.yaml           # Render deployment config
 ├── railway.json          # Railway deployment config
 ├── Procfile              # Heroku deployment config
 ├── runtime.txt           # Python runtime version
+├── build.sh              # Build script for deployment
+├── deploy.py             # Deployment helper script
 ├── models/               # Machine learning models
 │   ├── __init__.py
 │   ├── url_model.py      # URL phishing detector
