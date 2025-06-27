@@ -115,8 +115,7 @@ dmypy.json
 ehthumbs.db
 Thumbs.db
 
-# Model files (will be generated on first run)
-models/*.pkl
+
 
 # Large datasets (optional - remove if you want to include them)
 # dataset_phishing.csv
